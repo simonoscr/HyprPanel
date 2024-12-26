@@ -563,8 +563,9 @@ in
       };
 
     xdg.configFile.hyprpanel = let
-      customTheme = if cfg.customTheme != "" then builtins.toPath cfg.customTheme else if cfg.theme != "" then builtins.fromJSON (builtins.readFile ../themes/${cfg.theme}.json) else "";
-      theme = if customTheme != "" && builtins.pathExists customTheme then builtins.fromJSON (builtins.readFile customTheme) else {};
+      theme = if cfg.customTheme != "" then builtins.fromJSON (builtins.readFile cfg.customTheme)
+              else if cfg.theme != "" then builtins.fromJSON (builtins.readFile ../themes/${cfg.theme}.json)
+              else "";
       flatSet = flattenAttrs (lib.attrsets.recursiveUpdate cfg.settings theme) "";
       mergeSet = if cfg.layout == null then flatSet else flatSet // cfg.layout;
     in {
