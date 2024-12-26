@@ -5,7 +5,7 @@ let
   cfg = config.programs.hyprpanel;
 
   jsonFormat = pkgs.formats.json { };
-  
+
   # No package option
   package = self.packages.${pkgs.system}.default;
 
@@ -67,19 +67,23 @@ in
     systemd.enable = mkEnableOption "systemd integration";
     hyprland.enable = mkEnableOption "Hyprland integration";
     overwrite.enable = mkEnableOption "overwrite config fix";
-    
+
     theme = mkOption {
       type = types.str;
       default = "";
       example = "catppuccin_mocha";
       description = "Theme to import (see ./themes/*.json)";
     };
-    
+
     customTheme = mkOption {
-      type = types.str;
-      default = "";
-      example = "/path/to/custom_theme.json";
-      description = "Path to a custom theme file.";
+      type = types.nullOr types.path; # Allows null or a valid file path
+      default = null;                # Default to null when not set
+      example = ./themes/theme.json; # Example of a relative path
+      description = ''
+        Path to a custom theme file. This can be an absolute path or a relative path
+        resolved relative to the configuration file. If unset, the "theme" option
+        will be used to load a predefined theme.
+      '';
     };
 
     layout = mkOption {
@@ -563,9 +567,9 @@ in
       };
 
     xdg.configFile.hyprpanel = let
-      theme = if cfg.customTheme != "" then builtins.fromJSON (builtins.readFile ./. + cfg.customTheme)
+      theme = if cfg.customTheme != null then builtins.fromJSON (builtins.readFile cfg.customTheme)
               else if cfg.theme != "" then builtins.fromJSON (builtins.readFile ../themes/${cfg.theme}.json)
-              else "";
+              else {};
       flatSet = flattenAttrs (lib.attrsets.recursiveUpdate cfg.settings theme) "";
       mergeSet = if cfg.layout == null then flatSet else flatSet // cfg.layout;
     in {
