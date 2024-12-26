@@ -74,6 +74,13 @@ in
       example = "catppuccin_mocha";
       description = "Theme to import (see ./themes/*.json)";
     };
+    
+    customTheme = mkOption {
+      type = types.str;
+      default = "";
+      example = "/path/to/custom_theme.json";
+      description = "Path to a custom theme file.";
+    };
 
     layout = mkOption {
       type = jsonFormat.type;
@@ -556,7 +563,9 @@ in
       };
 
     xdg.configFile.hyprpanel = let
-      theme = if cfg.theme != "" then builtins.fromJSON (builtins.readFile ../themes/${cfg.theme}.json) else {};
+      customTheme = if cfg.customTheme != "" then cfg.customTheme else if cfg.theme != "" then ../themes/${cfg.theme}.json else {};
+      theme = if customTheme != "" then builtins.fromJSON (builtins.readFile customTheme) else {};
+      #theme = if cfg.theme != "" then builtins.fromJSON (builtins.readFile ../themes/${cfg.theme}.json) else {};
       flatSet = flattenAttrs (lib.attrsets.recursiveUpdate cfg.settings theme) "";
       mergeSet = if cfg.layout == null then flatSet else flatSet // cfg.layout;
     in {
