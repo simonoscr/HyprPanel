@@ -563,7 +563,7 @@ in
       };
 
     xdg.configFile.hyprpanel = let
-      theme = if cfg.customTheme != "" then builtins.fromJSON (builtins.readFile cfg.customTheme)
+      theme = if cfg.customTheme != "" then builtins.fromJSON (builtins.readFile ./. + cfg.customTheme)
               else if cfg.theme != "" then builtins.fromJSON (builtins.readFile ../themes/${cfg.theme}.json)
               else "";
       flatSet = flattenAttrs (lib.attrsets.recursiveUpdate cfg.settings theme) "";
